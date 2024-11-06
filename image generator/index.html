@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imaginate AI</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #1e1e1e;
+            color: #fff;
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        h1,
+        p {
+            color: #4CAF50;
+        }
+
+        #search-form {
+            margin: 20px;
+            text-align: center;
+            padding: 10px;
+        }
+
+        #search-input {
+            padding: 12px;
+            font-size: 18px;
+            width: 100%;
+            max-width: 500px;
+            margin-right: 10px;
+            border: 2px solid #4CAF50;
+            border-radius: 5px;
+            background: #2e2e2e;
+            color: #fff;
+        }
+
+        #search-button {
+            padding: 12px 20px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 50px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+        }
+
+        /* RGB rotating border animation */
+        @keyframes rgbRotation {
+            0% {
+                border-color: red;
+            }
+
+            25% {
+                border-color: yellow;
+            }
+
+            50% {
+                border-color: green;
+            }
+
+            75% {
+                border-color: cyan;
+            }
+
+            100% {
+                border-color: blue;
+            }
+        }
+
+        #search-button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        /* When the button is active (during image generation), apply the RGB rotation */
+        #search-button.active {
+            animation: rgbRotation 2s linear infinite;
+        }
+
+        #search-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: scale(1);
+            box-shadow: none;
+            animation: none;
+        }
+
+        #image-container {
+            margin: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            flex-grow: 1;
+        }
+
+        .image {
+            margin: 10px;
+            background: #333;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        .image img {
+            width: 100%;
+            max-width: 768px;
+            height: auto;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .error-message {
+            color: red;
+            text-align: center;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        .loading {
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            #search-input {
+                width: 100%;
+            }
+
+            #search-button {
+                width: 100%;
+                margin-top: 10px;
+            }
+
+            .image img {
+                width: 100%;
+                height: auto;
+            }
+        }
+
+        footer {
+            background-color: #333;
+            color: #fff;
+            padding: 20px 0;
+            text-align: center;
+            font-family: 'Roboto', sans-serif;
+            position: relative;
+            width: 100%;
+            bottom: 0;
+            left: 0;
+            box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        footer h4 {
+            font-size: 20px;
+            font-weight: 400;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #4CAF50;
+        }
+
+        footer h4 span {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        footer h4:hover {
+            color: #ffbb33;
+        }
+
+        footer a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <center>
+        <h1>Imaginate AI</h1>
+        <p> I can Generate a high-quality image (768x768 pixels) by entering a prompt below.</p>
+    </center>
+
+    <div id="search-form">
+        <input id="search-input" type="text" placeholder="Enter a prompt..." onkeydown="if(event.keyCode == 13) document.getElementById('search-button').click()">
+        <button id="search-button" type="button" onclick="searchImages()">Generate</button>
+    </div>
+
+    <div id="image-container"></div>
+    <div id="error-message" class="error-message"></div>
+
+    <script>
+        function searchImages() {
+            const imageContainer = document.getElementById('image-container');
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.innerHTML = ''; // Clear any previous error messages
+            imageContainer.innerHTML = ''; // Clear previous images
+
+            const prompt = document.getElementById('search-input').value.trim();
+            if (!prompt) {
+                alert("Please enter a prompt.");
+                return;
+            }
+
+            const searchButton = document.getElementById('search-button');
+            searchButton.disabled = true; // Disable button
+            searchButton.classList.add('active'); // Add RGB animation class
+
+            // Display a loading GIF while the image is being generated
+            const loadingWrapper = document.createElement('div');
+            loadingWrapper.classList.add('loading');
+            const loadingImg = document.createElement('img');
+            loadingImg.src = "https://media.tenor.com/G7LfW0O5qb8AAAAi/loading-gif.gif"; // Loading gif
+            loadingWrapper.appendChild(loadingImg);
+            imageContainer.appendChild(loadingWrapper);
+
+            const encodedPrompt = encodeURIComponent(prompt);
+
+            // Fetch a single 768x768 image from the API
+            fetch(`https://image.pollinations.ai/prompt/${encodedPrompt}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to generate image');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const imageUrl = URL.createObjectURL(blob);
+                    const imageWrapper = document.createElement('div');
+                    imageWrapper.classList.add('image');
+                    const img = document.createElement('img');
+                    img.src = imageUrl;
+                    imageWrapper.appendChild(img);
+                    imageContainer.innerHTML = ''; // Clear loading gif
+                    imageContainer.appendChild(imageWrapper);
+                })
+                .catch(error => {
+                    console.error(error);
+                    errorMessage.innerHTML = `Error generating image: ${error.message}`;
+                })
+                .finally(() => {
+                    searchButton.disabled = false; // Re-enable button
+                    searchButton.classList.remove('active'); // Remove RGB animation class
+                });
+        }
+    </script>
+</body>
+
+<footer><h4>Created by Jyotish Yadav.</h4></footer>
+
+</html>
